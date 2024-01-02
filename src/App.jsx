@@ -1,31 +1,75 @@
-import React from 'react';
-import Appbar from './Appbar.jsx'
-import Signin from  './Signin.jsx'
-import Signup from './Signup.jsx'
-import Addcourse from './Addcourse.jsx'
-//For routing he have this 
-import {BrowserRouter as Router, Routes,Route} from 'react-router-dom' //here BworserRouter exits in the react router dom lib- and we abbreviate it as Router 
+import { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "./App.css";
+import HomePage from "./Components/HomePage";
+import MenuAppBar from "./Components/MenuAppBar";
+import AdminLogin from "./Components/AdminLogin";
+import AdminSignup from "./Components/AdminSignup";
+import UserLogin from "./Components/UserLogin";
+import UserSignup from "./Components/UserSignup";
+import StickyFooter from "./Components/StickyFooter";
+import UserHomePage from "./Components/UserHomePage";
+import FrontPage from "./Components/FrontPage";
 
+function App() {
+  // const [count, setCount] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
 
-function App()
-  {
-    return (
-      <div >
-      <Appbar/>
-      <Router>
-        <Routes>
-          <Route path="/signin" element ={<Signin/>}></Route>
-          <Route path="/signup" element ={<Signup/>}></Route>
-        </Routes>
-      </Router>
-    
-      
-      
-      </div>
-    )
+    function checkLoginStatus() {
+      fetch("http://localhost:3000/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).then((res) => {
+        if (res.status == 200) {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+        }
+      });
+    }
 
-  }
+    if (token) {
+      checkLoginStatus();
+    }
+  }, []);
 
-  export default App;
+  return (
+    <Router>
+      <MenuAppBar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+      <Routes>
+        <Route path="/" element={<FrontPage />}></Route>
+        <Route
+          path="/admin"
+          element={<HomePage isLoggedIn={isLoggedIn} />}
+        ></Route>
+        <Route
+          path="/users"
+          element={<UserHomePage isLoggedIn={isLoggedIn} />}
+        ></Route>
+        <Route
+          path="/admin/signup"
+          element={<AdminSignup setIsLoggedIn={setIsLoggedIn} />}
+        ></Route>
+        <Route
+          path="/admin/login"
+          element={<AdminLogin setIsLoggedIn={setIsLoggedIn} />}
+        ></Route>
+        <Route
+          path="/users/signup"
+          element={<UserSignup setIsLoggedIn={setIsLoggedIn} />}
+        ></Route>
+        <Route
+          path="/users/login"
+          element={<UserLogin setIsLoggedIn={setIsLoggedIn} />}
+        ></Route>
+      </Routes>
+      <StickyFooter />
+    </Router>
+  );
+}
 
+export default App;
